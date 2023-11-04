@@ -1,13 +1,17 @@
 package services;
 
+import com.opencsv.exceptions.CsvException;
 import interfaces.ProductServiceInterface;
 import model.Product;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
+import java.io.IOException;
+
 
 public class ProductService implements ProductServiceInterface {
 
@@ -19,13 +23,13 @@ public class ProductService implements ProductServiceInterface {
 
     private void loadProductsFromCSV(String csvFilePath) {
         try {
-            File file = new File(csvFilePath);
-            Scanner fileScanner = new Scanner(file);
-            // Saltar el encabezado del CSV
-            fileScanner.nextLine();
-            while (fileScanner.hasNextLine()) {
-                String line = fileScanner.nextLine();
-                String[] productInfo = line.split(",");
+            FileReader fileReader = new FileReader(csvFilePath);
+            CSVReader csvReader = new CSVReaderBuilder(fileReader)
+                    .withSkipLines(1) // Salta el encabezado del CSV
+                    .build();
+
+            List<String[]> records = csvReader.readAll();
+            for (String[] productInfo : records) {
                 if (productInfo.length == 6) {
                     String name = productInfo[0];
                     String description = productInfo[1];
@@ -38,6 +42,10 @@ public class ProductService implements ProductServiceInterface {
                 }
             }
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CsvException e) {
             e.printStackTrace();
         }
     }
